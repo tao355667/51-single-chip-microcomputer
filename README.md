@@ -14,3 +14,4 @@ IDE：Keil5
 
 B站up主：江科大自动化协
 
+宏晶STC官方文档：<http://www.stcmcudata.com/>
