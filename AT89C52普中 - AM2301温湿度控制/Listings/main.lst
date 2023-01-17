@@ -1,0 +1,178 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              04/07/2022 14:23:27 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*
+   2          DS18B20温度读取
+   3          */
+   4          #include <REGX52.H>//标准头文件
+   5          #include "delay.h"//delay_ms()   unsigned char为u8,
+   6          #include "key.h"//独立按键头文件
+   7          #include "LCD1602.h"//LCD1602头文件
+   8          #include "timer.h"//定时器
+   9          #include "AM2301.h"//单总线1-wire协议
+  10          #include "AT24C02.h"//AT24C02
+  11          
+  12          sbit fog=P2^2;
+  13          sbit cold=P2^3;
+  14          //sbit LED=P2^4;
+  15          
+  16          u8 keynum,TH,TL,HH,HL,PAR=1,PAR_CNT=0;//按键值，温湿度读取值，校验位
+  17          u16 T,T14,H;//温度湿度值
+  18          s8 HLow,HHigh,TLow,THigh;//8位有符号整型，温湿度阈值
+  19          s32 TTrue;
+  20          
+  21          void main()
+  22          {
+  23   1              LCD_Init();
+  24   1              delay_ms(2000);//延时跳过传感器不稳定阶段
+  25   1              LCD_ShowString(1,1,"T:");
+  26   1              LCD_ShowString(2,1,"H:");
+  27   1              
+  28   1              HLow=AT24C02_ReadByte(0);
+  29   1              HHigh=AT24C02_ReadByte(1);
+  30   1              TLow=AT24C02_ReadByte(2);
+  31   1              THigh=AT24C02_ReadByte(3);
+  32   1              
+  33   1              if(THigh>80 || TLow<-20 || THigh==TLow ){
+  34   2                      THigh=25;TLow=15;
+  35   2              }
+  36   1              if(HHigh>100 || HLow<0 || HHigh==HLow){
+  37   2                      HHigh=75;HLow=70;
+  38   2              }
+  39   1              
+  40   1              LCD_ShowSignedNum(1,10,TLow,2);
+  41   1              LCD_ShowSignedNum(1,14,THigh,2);
+  42   1              LCD_ShowSignedNum(2,10,HLow,2);
+  43   1              LCD_ShowSignedNum(2,14,HHigh,2);
+  44   1              while(1)
+  45   1              {
+  46   2                      delay_ms(300);
+  47   2                      keynum=KEY_Scan(1);
+  48   2                      
+  49   2                      /*读取温湿度*/
+  50   2                      if(AM2301_Start()){//开始信号收到应答
+  51   3                              HH=AM2301_ReceiveByte();
+  52   3                              HL=AM2301_ReceiveByte();
+  53   3                              TH=AM2301_ReceiveByte();
+  54   3                              TL=AM2301_ReceiveByte();
+C51 COMPILER V9.59.0.0   MAIN                                                              04/07/2022 14:23:27 PAGE 2   
+
+  55   3                              PAR=AM2301_ReceiveByte();
+  56   3                              H=((u16)HH<<8)|((u16)HL);
+  57   3                              T=((u16)TH<<8)|((u16)TL);
+  58   3                              PAR_CNT=HH+HL+TH+TL;//计算出的校验位
+  59   3                      }
+  60   2                      /*显示温湿度*/
+  61   2                      if(PAR_CNT==PAR){//通过校验再显示温度
+  62   3                              //显示温度
+  63   3                              if(T/65535){
+  64   4                                      TTrue=-(s16)(T&0x7FFF);
+  65   4                                      LCD_ShowChar(1,3,'-');
+  66   4                              }else{
+  67   4                                      TTrue=(s16)(T&0x7FFF);
+  68   4                                  LCD_ShowChar(1,3,'+');
+  69   4                              }
+  70   3                              T14=T&0x7FFF;
+  71   3                              LCD_ShowNum(1,4,T14/10,2);
+  72   3                              LCD_ShowChar(1,6,'.');
+  73   3                              LCD_ShowNum(1,7,T14%10,1);
+  74   3                              LCD_ShowChar(1,8,'C');
+  75   3                              //显示湿度
+  76   3                              LCD_ShowNum(2,3,H/10,3);
+  77   3                              LCD_ShowChar(2,6,'.');
+  78   3                              LCD_ShowNum(2,7,H&10,1);
+  79   3                              LCD_ShowChar(2,8,'%');
+  80   3                      }
+  81   2                      /*按键判断*/
+  82   2                      if(keynum){
+  83   3                              if(keynum==1){
+  84   4                                      HLow--;
+  85   4                                      if(HLow<0){HLow=0;}
+  86   4                              }
+  87   3                              if(keynum==2){
+  88   4                                      HLow++;
+  89   4                                      if(HLow>=HHigh){HLow--;}
+  90   4                              }
+  91   3                              if(keynum==3){
+  92   4                                      HHigh--;
+  93   4                                      if(HLow>=HHigh){HHigh++;}
+  94   4                              }
+  95   3                              if(keynum==4){
+  96   4                                      HHigh++;
+  97   4                                      if(HHigh>100){HHigh=100;}
+  98   4                              }
+  99   3                              if(keynum==5){
+ 100   4                                      TLow--;
+ 101   4                                      if(HLow<-20){HLow=-20;}
+ 102   4                              }
+ 103   3                              if(keynum==6){
+ 104   4                                      TLow++;
+ 105   4                                      if(TLow>=THigh){TLow--;}
+ 106   4                              }
+ 107   3                              if(keynum==7){
+ 108   4                                      THigh--;
+ 109   4                                      if(HLow>=HHigh){THigh++;}
+ 110   4                              }
+ 111   3                              if(keynum==8){
+ 112   4                                      THigh++;
+ 113   4                                      if(THigh>80){THigh=80;}
+ 114   4                              }
+ 115   3                              AT24C02_WriteByte(0,HLow);delay_ms(5);
+ 116   3                              AT24C02_WriteByte(1,HHigh);delay_ms(5);
+C51 COMPILER V9.59.0.0   MAIN                                                              04/07/2022 14:23:27 PAGE 3   
+
+ 117   3                              AT24C02_WriteByte(2,TLow);delay_ms(5);
+ 118   3                              AT24C02_WriteByte(3,THigh);delay_ms(5);
+ 119   3                              
+ 120   3                              LCD_ShowSignedNum(1,10,TLow,2);
+ 121   3                              LCD_ShowSignedNum(1,14,THigh,2);
+ 122   3                              LCD_ShowSignedNum(2,10,HLow,2);
+ 123   3                              LCD_ShowSignedNum(2,14,HHigh,2);
+ 124   3                      }
+ 125   2                      /*报警判断*/
+ 126   2                      if(TTrue>THigh*10){
+ 127   3                              LCD_ShowString(1,13,"*");
+ 128   3                              cold=0;//夏天温度太高制冷
+ 129   3                      }else if(TTrue<TLow*10){
+ 130   3                              LCD_ShowString(1,9,"*");
+ 131   3                              //cold=0;//冬天温度太低制热
+ 132   3                              cold=1;//温度低下来后关闭制冷
+ 133   3                      }else{
+ 134   3                              LCD_ShowString(1,13," ");
+ 135   3                              LCD_ShowString(1,9," ");
+ 136   3                      }
+ 137   2                      if(H>HHigh*10){
+ 138   3                              LCD_ShowString(2,13,"*");
+ 139   3                              fog=1;//湿度太高关闭雾化片
+ 140   3                      }else if(H<HLow*10){
+ 141   3                              LCD_ShowString(2,9,"*");
+ 142   3                              fog=0;//湿度太低启动雾化片
+ 143   3                      }else{
+ 144   3                              LCD_ShowString(2,13," ");
+ 145   3                              LCD_ShowString(2,9," ");
+ 146   3                      }
+ 147   2                      
+ 148   2              }
+ 149   1      }
+ 150          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1131    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     21    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

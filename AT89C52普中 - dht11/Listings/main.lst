@@ -1,0 +1,87 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2022 14:13:26 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>//自带头文件
+   2          #include "typedef.h"//定义unsigned char为u8
+   3          #include "delay.h"//延时头文件，可调用delay_ms()
+   4          #include "key.h"//按键头文件，用于修改时间
+   5          #include "LCD1602.h"//LCD1602头文件
+   6          #include "dht11.h"
+   7          extern unsigned char U8RH_data_H;
+   8          extern unsigned char U8T_data_H;
+   9          extern unsigned char U8RH_data_L;
+  10          extern unsigned char U8T_data_L;
+  11          void main()
+  12          {
+  13   1      //      u8 s=20;
+  14   1      //      LCD_Init();
+  15   1      //      LCD_ShowChar(1,1,'2');
+  16   1      //      LCD_ShowString(1,2,"T:");
+  17   1      //      LCD_ShowNum(1,4,s,3);
+  18   1      //      LCD_ShowSignedNum(1,8,-56,2);
+  19   1      //      LCD_ShowHexNum(2,1,0x3f,3);
+  20   1      //      LCD_ShowBinNum(2,5,0xe,4);
+  21   1      //      
+  22   1      
+  23   1              u8 humidity_H,humidity_L,temperature_H,temperature_L;
+  24   1      
+  25   1              LCD_Init();
+  26   1              LCD_ShowString(1,1,"Tem:");
+  27   1              LCD_ShowString(1,9,"Hum:");
+  28   1              do
+  29   1              {
+  30   2                      DHT11_Start();
+  31   2                      delay_ms(100);
+  32   2              }while(U8RH_data_H==0&&U8T_data_H==0);
+  33   1                      
+  34   1              while(1)
+  35   1              {
+  36   2                      DHT11_Start();
+  37   2                               
+  38   2                      //读出温湿度，只取整数部分
+  39   2              humidity_H = U8RH_data_H;
+  40   2              temperature_H = U8T_data_H;
+  41   2                      humidity_L = U8RH_data_L;
+  42   2              temperature_L = U8T_data_L;
+  43   2                               
+  44   2      //              LCD_ShowNum(1,1,temperature/10+0x30,2);
+  45   2      //              LCD_ShowNum(1,8,temperature%10+0x30,3);
+  46   2      //              LCD_ShowNum(2,1,humidity/10+0x30,3);
+  47   2      //              LCD_ShowNum(2,8,humidity%10+0x30,3);
+  48   2                      
+  49   2                      LCD_ShowNum(2,1,temperature_H,2);
+  50   2                      LCD_ShowChar(2,3,'.');
+  51   2                      LCD_ShowNum(2,4,temperature_L,2); 
+  52   2                      LCD_ShowString(2,5,"°");
+  53   2                      LCD_ShowChar(2,6,'C');
+  54   2                      LCD_ShowNum(2,9,humidity_H,2);
+C51 COMPILER V9.59.0.0   MAIN                                                              04/05/2022 14:13:26 PAGE 2   
+
+  55   2                      LCD_ShowChar(2,11,'.');
+  56   2                      LCD_ShowNum(2,12,humidity_L,2);
+  57   2                      LCD_ShowString(2,11,"%");
+  58   2                      delay_ms(100);
+  59   2              }
+  60   1      }
+  61          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    193    ----
+   CONSTANT SIZE    =     15    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

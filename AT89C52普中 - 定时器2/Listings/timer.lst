@@ -1,0 +1,75 @@
+C51 COMPILER V9.59.0.0   TIMER                                                             04/27/2022 17:10:04 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE TIMER
+OBJECT MODULE PLACED IN .\Objects\timer.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE timer.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\tim
+                    -er.lst) OBJECT(.\Objects\timer.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "key.h"
+   3          
+   4          
+   5          sbit Motor=P1^0;
+   6          
+   7          unsigned char Counter_Motor=0,Compare_Motor=50;
+   8          unsigned char i;
+   9          
+  10          void Timer2_Init(void)          //50毫秒@11.0592MHz
+  11          {
+  12   1              T2MOD = 0x00;           //初始化模式寄存器
+  13   1              T2CON = 0x04;           //初始化控制寄存器，16位自动重装载
+  14   1              TL2 = 0x00;             //设置定时初值
+  15   1              TH2 = 0x4C;             //设置定时初值
+  16   1              RCAP2L = 0x00;          //设置定时重载值
+  17   1              RCAP2H = 0x4C;          //设置定时重载值
+  18   1              
+  19   1      
+  20   1              EA=1;ET2=1;//使能中断
+  21   1              
+  22   1              TR2 = 1;                //定时器2开始计时
+  23   1              
+  24   1      }
+  25          
+  26          
+  27          void Timer2_Rountine() interrupt 5
+  28          {
+  29   1      //      P2=0x00;
+  30   1      //      //      P2=0x00;
+  31   1      //      
+  32   1      //      for(i=0;i<255;i++){
+  33   1      //              P2++;
+  34   1      //              delay_ms(100);
+  35   1      //      }
+  36   1      //      
+  37   1              Counter_Motor++;
+  38   1              Counter_Motor%=100;
+  39   1              
+  40   1              if(Counter_Motor>Compare_Motor)
+  41   1              {
+  42   2                      Motor=1;
+  43   2                      P2=0x0F;
+  44   2              }else{
+  45   2                      Motor=0;
+  46   2                      P2=0xF0;
+  47   2              }
+  48   1      
+  49   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     66    ----
+   CONSTANT SIZE    =   ----    ----
+C51 COMPILER V9.59.0.0   TIMER                                                             04/27/2022 17:10:04 PAGE 2   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

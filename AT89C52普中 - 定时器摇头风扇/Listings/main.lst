@@ -1,0 +1,98 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              04/11/2022 22:05:51 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*
+   2          定时器舵机
+   3          SG90舵机一个周期20ms
+   4          高电平时间对应角度
+   5          0.5ms   0°
+   6          1ms             45°
+   7          1.5ms   90°
+   8          2ms             135°
+   9          2.5ms   180°
+  10          //具体数据应以试验为主，此次试验如下：
+  11                                  if(speed==0){Compare_Servo=4;}
+  12                                  if(speed==1){Compare_Servo=8;}
+  13                                  if(speed==2){Compare_Servo=13;}
+  14                                  if(speed==3){Compare_Servo=18;}
+  15                                  if(speed==4){Compare_Servo=25;}
+  16          */
+  17          #include <REGX52.H>//标准头文件
+  18          #include "51common.h"//定义unsigned char为u8,延时函数delay_ms()
+  19          #include "key.h"//独立按键头文件
+  20          #include "LCD1602.h"//LCD1602头文件
+  21          #include "timer.h"//定时器
+  22          #include "delay.h"//延时函数
+*** WARNING C235 IN LINE 16 OF delay.h: parameter 1: different types
+  23          
+  24          unsigned char Counter_Servo,Compare_Servo,Counter_Motor,Compare_Motor;
+  25          unsigned char key,speed,angle;
+  26          unsigned char i;
+  27          
+  28          void main()
+  29          {
+  30   1              Timer0_Init();
+  31   1              Timer1_Init();
+  32   1      //      Timer2Init();
+  33   1              while(1)
+  34   1              {
+  35   2                      key=KEY_Scan(0);
+  36   2                      if(key==1){
+  37   3                              //if(angle==0){Compare_Servo=4;}
+  38   3                              if(angle==0){Compare_Servo=9;}
+  39   3                              if(angle==1){Compare_Servo=13;}
+  40   3                              if(angle==2){Compare_Servo=18;}
+  41   3                              if(angle==3){Compare_Servo=25;}
+  42   3                              angle++;
+  43   3                              angle%=4;
+  44   3                      }
+  45   2                      
+  46   2                      if(key==2){
+  47   3                              speed++;
+  48   3                              speed%=5;
+  49   3                              if(speed==0){Compare_Motor=0;}
+  50   3                              if(speed==1){Compare_Motor=30;}
+  51   3                              if(speed==2){Compare_Motor=50;}
+  52   3                              if(speed==3){Compare_Motor=75;}
+  53   3                              if(speed==4){Compare_Motor=100;}
+C51 COMPILER V9.59.0.0   MAIN                                                              04/11/2022 22:05:51 PAGE 2   
+
+  54   3                      }
+  55   2                      if(key==3){
+  56   3                              while(KEY_Scan(0)!=2)
+  57   3                              {
+  58   4                                      
+  59   4                                      for(Compare_Servo=9;Compare_Servo<21;Compare_Servo++){
+  60   5                                              delay_ms(1000);
+  61   5                                      }
+  62   4                                      for(Compare_Servo=21;Compare_Servo>10;Compare_Servo--){
+  63   5                                              delay_ms(1000);
+  64   5                                      }
+  65   4                                                                      
+  66   4                              }
+  67   3                      }
+  68   2              }
+  69   1              
+  70   1      }
+  71          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    200    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      8    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,6 @@
+".\Objects\main.obj",
+".\Objects\delay.obj",
+".\Objects\key.obj",
+".\Objects\timer.obj" 
+TO ".\Objects\Temple" 
+PRINT(".\Listings\Temple.m51") RAMSIZE(256) 

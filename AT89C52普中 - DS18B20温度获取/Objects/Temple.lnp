@@ -1,0 +1,11 @@
+".\Objects\main.obj",
+".\Objects\key.obj",
+".\Objects\LCD1602.obj",
+".\Objects\timer.obj",
+".\Objects\I2C.obj",
+".\Objects\delay.obj",
+".\Objects\OneWire.obj",
+".\Objects\DS18B20.obj" 
+TO ".\Objects\Temple" 
+PRINT(".\Listings\Temple.m51") RAMSIZE(256) 
+DISABLEWARNING (16) 

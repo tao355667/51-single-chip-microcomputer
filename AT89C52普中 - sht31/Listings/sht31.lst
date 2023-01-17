@@ -1,0 +1,54 @@
+C51 COMPILER V9.59.0.0   SHT31                                                             04/06/2022 12:56:04 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE SHT31
+OBJECT MODULE PLACED IN .\Objects\sht31.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE sht31.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\sht
+                    -31.lst) OBJECT(.\Objects\sht31.obj)
+
+line level    source
+
+   1          #include <REGX52.H>//标准头文件
+   2          #include "delay.h"//delay_ms()   unsigned char为u8,
+   3          #include "LCD1602.h"//LCD1602头文件
+   4          #include "OneWire.h"//单总线1-wire协议
+   5          
+   6          #define DS18B20_SKIP_ROM        0xCC
+   7          #define DS18B20_CONVERT_T       0x44
+   8          #define DS18B20_READ_SCRATCHPAD 0xBE
+   9          
+  10          void SHT31_Start(void)
+  11          {
+  12   1              OneWire_Init();
+  13   1              OneWire_SendByte(DS18B20_SKIP_ROM);
+  14   1              OneWire_SendByte(DS18B20_CONVERT_T);
+  15   1      }
+  16          
+  17          float SHT31_ReadByte(void)//读取温度
+  18          {
+  19   1              unsigned char TLSB,TMSB;
+  20   1              int Temp;
+  21   1              float T;
+  22   1              OneWire_Init();
+  23   1              OneWire_SendByte(DS18B20_SKIP_ROM);
+  24   1              OneWire_SendByte(DS18B20_READ_SCRATCHPAD);
+  25   1              TLSB=OneWire_ReceiveByte();
+  26   1              TMSB=OneWire_ReceiveByte();
+  27   1              Temp=(TMSB<<8)|TLSB;
+  28   1              T=Temp/16.0;
+  29   1              return T;
+  30   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     56    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

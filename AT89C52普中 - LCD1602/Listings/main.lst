@@ -1,0 +1,158 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              04/02/2022 18:40:58 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*
+   2          此程序用延时的方法制作了一个电子钟，并可以手动调节时间
+   3          外设：LCD1602，三个独立按键（下拉）
+   4          
+   5          使用方法：启动时为模式0，从0时刻开始记时间
+   6                            长按设置键（1秒），可进入设置模式1，在设置模式1中可通过加减按键调节秒的数值
+   7                            再按设置键，可进入设置模式1，在设置模式1中可通过加减按键调节“秒”的数值
+   8                            再按设置键，可进入设置模式2，在设置模式2中可通过加减按键调节“分”的数值
+   9                            再按设置键，可进入设置模式3，在设置模式3中可通过加减按键调节“时”的数值
+  10                            再按设置键，回到模式0（时钟模式）
+  11          
+  12          */
+  13          
+  14          #include <REGX52.H>//标准头文件
+  15          #include "typedef.h"//定义unsigned char为u8
+  16          #include "delay.h"//延时头文件，可调用delay_ms()
+  17          #include "key.h"//独立按键头文件
+  18          #include "LCD1602.h"//LCD1602头文件
+  19          
+  20          #define keyMode P3_1    //模式按键
+  21          #define keyPlus P3_0    //加键
+  22          #define keyReduce P3_2  //减键
+  23          
+  24          void showTime(void);//时间+1s，显示时间
+  25          void set_second(void);//设置秒
+  26          void set_minute(void);//设置分钟
+  27          void set_hour(void);//设置小时
+  28          void key_scan(void);//扫描设置键
+  29          
+  30          //初始时间--全局变量
+  31          u8 second=0;//秒
+  32          u8 minute=0;//分
+  33          u8 hour=0;//时
+  34          u8 mode=0;//初始模式
+  35          
+  36          void main()
+  37          {
+  38   1              LCD_Init();
+  39   1              LCD_ShowString(1,1,"TIME:");//LCD屏幕上显示TIME：
+  40   1              LCD_ShowChar(2,3,':');//显示时间中间的冒号
+  41   1              LCD_ShowChar(2,6,':');//显示时间中间的冒号
+  42   1              
+  43   1              while(1)
+  44   1              {
+  45   2                      key_scan();//检测设置按键是否按下
+  46   2                      if(mode==0)showTime();//显示时间
+  47   2                      if(mode==1)set_second();//设置秒
+  48   2                      if(mode==2)set_minute();//设置分
+  49   2                      if(mode==3)set_hour();//设置小时
+  50   2                      LCD_ShowString(1,6,"           ");//擦除文字痕迹
+  51   2              }
+  52   1      }
+  53          
+  54          
+C51 COMPILER V9.59.0.0   MAIN                                                              04/02/2022 18:40:58 PAGE 2   
+
+  55          
+  56          void key_scan(void)
+  57          {
+  58   1              if(!keyMode){
+  59   2                      delay_ms(10);
+  60   2                      while(!keyMode);
+  61   2                      mode=(mode+1)%4;
+  62   2              }
+  63   1              
+  64   1      }
+  65          
+  66          void showTime(void)
+  67          {
+  68   1              //对时间溢出的处理
+  69   1              if(second>59){
+  70   2                      second=0;minute++;
+  71   2              }
+  72   1              if(minute>59){
+  73   2                      minute=0;hour++;
+  74   2              }
+  75   1              if(hour>23){
+  76   2                      hour=0;
+  77   2              }
+  78   1              LCD_ShowNum(2,1,hour,2);//显示时
+  79   1              LCD_ShowNum(2,4,minute,2);//显示分
+  80   1              LCD_ShowNum(2,7,second++,2);//显示秒
+  81   1              delay_ms(980);//延时函数，计1秒，考虑其他程序执行时间，可适当缩小
+  82   1      }
+  83          
+  84          void set_second(void)
+  85          {
+  86   1              LCD_ShowString(1,6,"Set:Second ");//显示调节模式示意文字
+  87   1          do{
+  88   2                      if(!keyPlus){//按键检测，长按短按都有效，易于调节
+  89   3                              second=(second+1)%60;//按键生效一次，秒数+1，为防止溢出使用了取余数算法
+  90   3                              delay_ms(200);//延时以减缓时间调节速度
+  91   3                      }
+  92   2                      if(!keyReduce){
+  93   3                              (second==0)?(second=59):(second--);//问号表达式，按键生效一次，秒数-1，用重新赋值防止溢出
+  94   3                              delay_ms(200);//延时以减缓时间调节速度
+  95   3                      }
+  96   2                      LCD_ShowNum(2,7,second,2);//展示调节后的秒数
+  97   2              }while(keyMode);//模式按键没按下，就一直循环。模式按键按下时就跳出此模式
+  98   1      }
+  99          
+ 100          void set_minute(void)
+ 101          {
+ 102   1              LCD_ShowString(1,6,"Set:Minute  ");//显示调节模式示意文字
+ 103   1              do{
+ 104   2                      if(!keyPlus){
+ 105   3                               minute=(minute+1)%60;
+ 106   3                              delay_ms(200);//延时以减缓时间调节速度
+ 107   3                      }
+ 108   2                      if(!keyReduce){
+ 109   3                              (minute==0)?(minute=59):(minute--);
+ 110   3                              delay_ms(200);//延时以减缓时间调节速度
+ 111   3                      }
+ 112   2                      LCD_ShowNum(2,4,minute,2);
+ 113   2              }while(keyMode);
+ 114   1      }
+ 115          
+ 116          void set_hour(void)
+C51 COMPILER V9.59.0.0   MAIN                                                              04/02/2022 18:40:58 PAGE 3   
+
+ 117          {
+ 118   1              LCD_ShowString(1,6,"Set:Hour   ");//显示调节模式示意文字
+ 119   1              do{
+ 120   2                      if(!keyPlus){
+ 121   3                              hour=(hour+1)%24;
+ 122   3                              delay_ms(200);//延时以减缓时间调节速度
+ 123   3                      }
+ 124   2                      if(!keyReduce){
+ 125   3                              (hour==0)?(hour=23):(hour--);
+ 126   3                              delay_ms(200);//延时以减缓时间调节速度
+ 127   3                      }
+ 128   2                      LCD_ShowNum(2,1,hour,2);
+ 129   2              }while(keyMode);
+ 130   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    480    ----
+   CONSTANT SIZE    =     55    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

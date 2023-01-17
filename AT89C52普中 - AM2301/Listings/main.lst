@@ -1,0 +1,86 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              04/06/2022 19:07:50 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*
+   2          DS18B20温度读取
+   3          */
+   4          #include <REGX52.H>//标准头文件
+   5          #include "delay.h"//delay_ms()   unsigned char为u8,
+   6          #include "key.h"//独立按键头文件
+   7          #include "LCD1602.h"//LCD1602头文件
+   8          #include "timer.h"//定时器
+   9          #include "AM2301.h"//单总线1-wire协议
+  10          //#include "DS18B20.h"//DS18B20
+  11          //#include "AT24C02.h"//AT24C02
+  12          
+  13          u8 TH,TL,HH,HL,PAR,PAR_CNT;
+  14          u16 T,T14,H;//温度湿度值
+  15          
+  16          f32 TrueT,TrueH;
+  17          
+  18          void main()
+  19          {
+  20   1              LCD_Init();
+  21   1              delay_ms(2000);//延时跳过传感器不稳定阶段
+  22   1              LCD_ShowString(1,1,"T:");
+  23   1              LCD_ShowString(2,1,"H:");
+  24   1              
+  25   1              while(1)
+  26   1              {
+  27   2                      //扫描周期
+  28   2                      delay_ms(500);
+  29   2                      AM2301_Start();//开始信号
+  30   2                      
+  31   2                      HH=AM2301_ReceiveByte();
+  32   2                      HL=AM2301_ReceiveByte();
+  33   2                      TH=AM2301_ReceiveByte();
+  34   2                      TL=AM2301_ReceiveByte();
+  35   2                      PAR=AM2301_ReceiveByte();
+  36   2                      
+  37   2                      H=((u16)HH<<8)|((u16)HL);
+  38   2                      T=((u16)TH<<8)|((u16)TL);
+  39   2                      PAR_CNT=HH+HL+TH+TL;//计算出的校验位
+  40   2      
+  41   2                      if(PAR_CNT==PAR){//通过校验再显示温度
+  42   3                              //显示温度
+  43   3                              if(T/65535){
+  44   4                                      LCD_ShowChar(1,3,'-');
+  45   4                              }else{LCD_ShowChar(1,3,'+');}
+  46   3                              T14=T&0x7FFF;
+  47   3                              LCD_ShowNum(1,4,T14/10,2);
+  48   3                              LCD_ShowChar(1,6,'.');
+  49   3                              LCD_ShowNum(1,7,T14%10,1);
+  50   3                              LCD_ShowChar(1,8,'C');
+  51   3                              //显示湿度
+  52   3                              LCD_ShowNum(2,3,H/10,3);
+  53   3                              LCD_ShowChar(2,6,'.');
+  54   3                              LCD_ShowNum(2,7,H&10,1);
+C51 COMPILER V9.59.0.0   MAIN                                                              04/06/2022 19:07:50 PAGE 2   
+
+  55   3                              LCD_ShowChar(2,8,'%');
+  56   3                      }
+  57   2                      
+  58   2              }
+  59   1      }
+  60          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    282    ----
+   CONSTANT SIZE    =      6    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     20    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

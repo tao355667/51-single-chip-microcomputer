@@ -1,0 +1,122 @@
+C51 COMPILER V9.59.0.0   TIMER                                                             04/11/2022 22:05:51 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE TIMER
+OBJECT MODULE PLACED IN .\Objects\timer.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE timer.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\tim
+                    -er.lst) OBJECT(.\Objects\timer.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "key.h"
+   3          
+   4          sbit LED=P2^0;
+   5          sbit Motor=P1^0;
+   6          sbit Servo=P0^0;
+   7          
+   8          
+   9          extern unsigned char Counter_Motor,Counter_Servo,Compare_Servo,Compare_Motor;
+  10          extern unsigned char key;
+  11          
+  12          void Timer0_Init()
+  13          {
+  14   1      //      TMOD=0x01;//工作模式
+  15   1              TMOD&=0xF0;//工作模式--保留高四位，低四位清零
+  16   1              TMOD|=0x01;//工作模式--保留高四位，用新数据更新低四位，
+  17   1              TF0=0;//溢出位，置0
+  18   1              TR0=1;//开始工作
+  19   1              //定时0.1ms初值
+  20   1              TH0=0xFF;
+  21   1              TL0=0xA4;
+  22   1              //允许T0中断
+  23   1              EA=1;ET0=1;
+  24   1              //中断优先级
+  25   1              PT0=1;
+  26   1      }
+  27          
+  28          void Timer1_Init()
+  29          {
+  30   1      //      TMOD=0x01;//工作模式
+  31   1              TMOD&=0x0F;//工作模式--保留高四位，低四位清零
+  32   1              TMOD|=0x10;//工作模式--保留高四位，用新数据更新低四位，
+  33   1              TF1=0;//溢出位，置0
+  34   1              TR1=1;//开始工作
+  35   1              //定时0.1ms初值
+  36   1              TH1=0xFF;
+  37   1              TL1=0xA4;
+  38   1              //允许T0中断
+  39   1              EA=1;ET1=1;
+  40   1              //中断优先级
+  41   1              PT1=0;
+  42   1      }
+  43          
+  44          void Timer2Init(void)           //10微秒@11.0592MHz
+  45          {
+  46   1              T2MOD = 0;              //初始化模式寄存器
+  47   1              T2CON = 0;              //初始化控制寄存器
+  48   1              TL2 = 0xF7;             //设置定时初值
+  49   1              TH2 = 0xFF;             //设置定时初值
+  50   1              RCAP2L = 0xF7;          //设置定时重载值
+  51   1              RCAP2H = 0xFF;          //设置定时重载值
+  52   1              TR2 = 1;                //定时器2开始计时
+  53   1      }
+  54          
+C51 COMPILER V9.59.0.0   TIMER                                                             04/11/2022 22:05:51 PAGE 2   
+
+  55          
+  56          void Timer0_Rountine() interrupt 1
+  57          {
+  58   1              //定时0.1ms初值
+  59   1              TH0=0xFF;
+  60   1              TL0=0xA4;
+  61   1              Counter_Servo++;
+  62   1              Counter_Servo%=200;
+  63   1              if(Counter_Servo<Compare_Servo)
+  64   1              {
+  65   2                      LED=0;
+  66   2                      Servo=1;
+  67   2              }else{
+  68   2                      LED=1;
+  69   2                      Servo=0;
+  70   2              }
+  71   1              
+  72   1      }
+  73          
+  74          void Timer1_Rountine() interrupt 3
+  75          {
+  76   1              
+  77   1              //定时0.1ms初值
+  78   1              TH1=0xFF;
+  79   1              TL1=0xA4;
+  80   1              Counter_Motor++;
+  81   1              Counter_Motor%=100;
+  82   1              if(Counter_Motor<Compare_Motor)
+  83   1              {
+  84   2                      Motor=1;
+  85   2              }else{
+  86   2                      Motor=0;
+  87   2              }
+  88   1              
+  89   1      }
+  90          
+  91          void Timer2_Rountine() interrupt 5
+  92          {
+  93   1              TL2 = 0xF7;             //设置定时初值
+  94   1              TH2 = 0xFF;             //设置定时初值
+  95   1              key=KEY_Scan(1);
+  96   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    225    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

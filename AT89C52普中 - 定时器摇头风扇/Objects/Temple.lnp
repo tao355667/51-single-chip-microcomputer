@@ -1,0 +1,8 @@
+".\Objects\main.obj",
+".\Objects\key.obj",
+".\Objects\LCD1602.obj",
+".\Objects\timer.obj",
+".\Objects\delay.obj" 
+TO ".\Objects\Temple" 
+PRINT(".\Listings\Temple.m51") RAMSIZE(256) 
+DISABLEWARNING (16) 
