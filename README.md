@@ -12,6 +12,6 @@ IDE：Keil5
 
 参考资料：
 
-B站up主：江科大自动化协
+B站up主：江科大自化协（后更名为 江协科技）
 
 宏晶STC官方文档：<http://www.stcmcudata.com/>
